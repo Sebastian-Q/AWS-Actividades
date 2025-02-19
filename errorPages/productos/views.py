@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from .models import Producto
 from .forms import productoForm
 from django.http import JsonResponse
+import json
 
 # Agregar un producto
 def agregarProducto(request):
@@ -39,3 +40,27 @@ def lista_productos(request):
 
 def json_view(request):
     return render(request, 'json.html')
+
+#@crsf_exempt <-- No es seguro hacer esto (no lo hagas) solo pa pruebas
+def registrar_producto(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            nuevo_producto = Producto.objects.create(
+                nombre = data['nombre'],
+                precio = data['precio'],
+                imagen = data['imagen']
+            )
+            return JsonResponse({
+                'mensaje':'Registrado exitoso',
+                'id': nuevo_producto.id
+            }, status=201
+            )
+        except Exception as e:
+            return JsonResponse({
+                'error': str(e)
+            }, status=400)
+    return JsonResponse({
+        'error': 'Método no es POST'
+    }, status=405
+    )
