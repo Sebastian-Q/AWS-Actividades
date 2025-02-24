@@ -9,16 +9,106 @@
 </head>
 <body>
     <div class="container">
-        <div class="aling-center p-4" style="padding: 16px;">
-            <h1>Agregar Categoria</h1>
-            <form method="POST">
-                {% csrf_token %}
-                {{ form.as_p }}
-                <button type="submit">Agregar</button>
-            </form>        
-            <a href="{% url 'consultar' %}">Ver Categorias</a>
+        <div class="col">
+            <div class="row">
+                <!-- El formulario -->
+                <div class="col-6">
+                    <h1>Agregar Categoria</h1>
+                    <form method="POST" id="categoriaForm">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                        <button class="btn btn-primary" type="submit">Agregar</button>
+                    </form>        
+                
+                    <div>
+                        <p id="mensaje"></p>
+                    </div>
+
+                </div>
+                
+                <!-- La vista de productos -->
+                <div class="col-6 mt-3">
+                    <h1>Ver Categorias</h1>
+                    <div class="row" id="categorias"></div>
+                </div>
+            </div>
         </div>
     </div>
+
+    <script>
+        //Vamos a usar el formulario para hacer un request POST a mi API
+        var form = document.getElementById('categoriaForm');
+        //En este caso el event es el comportamiento del formulario
+        form.addEventListener('submit', function(event){
+            //Para evitar que se mande un formalario en este contexto
+            event.preventDefault();
+
+            //Obtener los datos del formulario
+            let formData = new FormData(this);
+
+            //Convertir los datos Json
+            let jsonData = {};
+            //En este contexto el valor es el dato del input y la key es el "name"
+            formData.forEach((value, key) => {
+                jsonData[key] = value;
+            });
+
+            //Enviar estos datos al servidor
+            fetch('/categoria/api/post/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken() //<-- Esta funcion se hara mas adelante
+                },
+                body: JSON.stringify(jsonData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('mensaje').innerText = 'Registro exitoso';
+                //Repintar los elementos
+                cargarCategorias();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+
+        //Funcion para obtener el token CSRF
+        function getCSRFToken(){
+            let cookieValue = null;
+            let cookies = document.cookie.split(';');
+            for(let i=0; i<cookies.length; i++){
+                let cookie = cookies[i].trim();
+                if(cookie.startsWith('csrftoken=')){
+                    cookieValue = cookie.substring('csrftoken='.length, cookie.length);
+                    break;
+                }
+            }
+            return cookieValue;
+        }
+
+        function cargarCategorias(){
+            fetch('/categoria/api/get/')
+                .then(response => response.json())
+                .then(data => {
+                    let categoriasDiv = document.getElementById('categorias');
+                    categoriasDiv.innerHTML = "";
+                    data.forEach(categoria => {
+                        categoriasDiv.innerHTML += `
+                            <div class="col-md-4">
+                                <div class="card mb-4 shadow-sm">
+                                    <img src="${categoria.imagen}" class="card-img-top" alt="${categoria.nombre}">
+                                    <div class="card-body">
+                                        <h5 class="card-title">${categoria.nombre}</h5>
+                                        <p class="card-text">Descripción de la categoría XD.</p>
+                                    </div>
+                                </div>
+                            </div>`;
+                    });
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    </script>
     
 </body>
 </html>
