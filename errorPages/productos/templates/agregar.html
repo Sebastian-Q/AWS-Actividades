@@ -12,6 +12,14 @@
     <div class="container">
         <div class="col">
             <div class="row">
+
+                <!-- Spinner de carga-->
+                <div id="spinner" class="text-center col" style="display: none;">
+                    <div class="spinner-border text-primary" role="status">
+                    </div>
+                    <span>Cargando...</span>
+                </div>
+
                 <!-- El formulario -->
                 <div class="col-6">
                     <h1>Agregar Producto</h1>
@@ -37,6 +45,13 @@
     </div>
 
     <script>
+        function toogleSpinner(show){
+            let spinner = document.getElementById('spinner');
+            spinner.style.display = show ? 'block' : 'none';
+        }
+    </script>
+
+    <script>
         //Vamos a usar el formulario para hacer un request POST a mi API
         var form = document.getElementById('productoForm');
         //En este caso el event es el comportamiento del formulario
@@ -54,12 +69,14 @@
                 jsonData[key] = value;
             });
 
+            toogleSpinner(true);
+
             //Enviar estos datos al servidor
-            fetch('/productos/api/post/', {
+            fetch('/productos/api/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRFToken': getCSRFToken() //<-- Esta funcion se hara mas adelante
+                    //'X-CSRFToken': getCSRFToken() //<-- Esta funcion se hara mas adelante
                 },
                 body: JSON.stringify(jsonData)
             })
@@ -71,6 +88,9 @@
             })
             .catch(error => {
                 console.error('Error:', error);
+            })
+            .finally(() => {
+                toogleSpinner(false);
             });
         });
 
@@ -89,7 +109,8 @@
         }
 
         function cargarProductos(){
-            fetch('/productos/api/get/')
+            toogleSpinner(true);
+            fetch('/productos/api/')
                 .then(response => response.json())
                 .then(data => {
                     let productosDiv = document.getElementById('productos');
@@ -98,8 +119,11 @@
                         productosDiv.innerHTML += `<div class="col-3"><strong>${producto.nombre}</strong> - $${producto.precio} - <br> <img src="${producto.imagen}" width="100"/></div>`;
                     });
                 })
-                .catch(error => console.error('Error:', error));
+                .catch(error => console.error('Error:', error))
+                .finally(() => toogleSpinner(false));
         }
+
+        cargarProductos();
     </script>
 
     

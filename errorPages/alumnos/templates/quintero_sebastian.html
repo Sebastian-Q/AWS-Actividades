@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Alumnos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+</head>
+<body>
+
+    <div class="container">
+        <div class="col">
+            <div class="row">
+                <!-- Spinner de carga-->
+                <div id="spinner" class="text-center col" style="display: none;">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <span>Cargando información...</span>
+                </div>
+
+                <!-- El formulario -->
+                <div class="col-6">
+                    <h1>Registrar Alumno</h1>
+                    <form method="POST" id="alumnoForm">
+                        {{ form.as_p }}
+                        <button class="btn btn-primary" type="submit" id="buttonAction">Registrar</button>
+                    </form>
+                    <div>
+                        <p id="mensaje"></p>
+                    </div>
+                </div>
+                
+                <!-- La vista de alumnos -->
+                <div class="col-6 mt-3">
+                    <h1>Lista Alumnos</h1>
+                    <div class="row" id="alumnos"></div>
+                </div>
+            </div>
+
+            <div class="text-center col">
+                <p id="mensajeCrud"></p>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        function toogleSpinner(show){
+            let spinner = document.getElementById('spinner');
+            spinner.style.display = show ? 'block' : 'none';
+        }
+    </script>
+
+    <script>
+        //Vamos a usar el formulario para hacer un request POST a mi API
+        var form = document.getElementById('alumnoForm');
+        let alumnoId = 0;
+
+        //En este caso el event es el comportamiento del formulario
+        form.addEventListener('submit', function(event){
+            //Para evitar que se mande un formalario en este contexto
+            event.preventDefault();
+
+            //Mostrar el spinner
+            toogleSpinner(true);
+
+            //Obtener los datos del formulario
+            let formData = new FormData(this);
+
+            //Convertir los datos Json
+            let jsonData = {};
+            //En este contexto el valor es el dato del input y la key es el "name"
+            formData.forEach((value, key) => {
+                jsonData[key] = value;
+            });
+
+            //Determinar si esta editando o guardando
+            let editar = alumnoId != 0;
+            let url = editar ? `/alumnos/api/${alumnoId}/` : '/alumnos/api/';
+            let metodo = editar ? 'PUT' : 'POST';
+
+            //Enviar estos datos al servidor
+            fetch(url, {
+                method: metodo,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(jsonData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('mensaje').innerText = editar ? 'Alumno actualizado exitosamente' : 'Alumno registrado exitosamente';
+                cargarAlumnos();
+                form.reset();
+
+                if(editar){
+                    alumnoId = 0;
+                    document.getElementById('buttonAction').textContent = 'Registrar';
+                }
+            })
+            .catch(error => {
+                document.getElementById('mensaje').innerText = 'Registro fallido';
+                console.error('Error:', error);
+            })
+            .finally(() => {
+                toogleSpinner(false);
+            });
+        });
+
+        function consultarAlumno(id){
+            fetch(`/alumnos/api/${id}/`)
+                .then(response => response.json())
+                .then(data => {
+                    form.matricula.value = data.matricula;
+                    form.nombre.value = data.nombre;
+                    form.apellido.value = data.apellido;
+                    form.edad.value = data.edad;
+                    form.correo.value = data.correo;
+                    alumnoId = data.id;
+                    let accion = document.getElementById('buttonAction');
+                    accion.textContent = 'Actualizar';
+                })
+                .catch(error => {
+                    document.getElementById('mensaje').innerText = 'Actualización fallido';
+                    console.error('Error:', error);
+                });
+        }
+
+        function eliminarAlumno(id){
+            toogleSpinner(true);
+            fetch(`/alumnos/api/${id}/`, {
+                method: 'DELETE'
+            })
+            .then(data => {
+                document.getElementById('mensajeCrud').innerText = 'Alumno eliminado';
+                cargarAlumnos();
+            })
+            .catch(error => {
+                document.getElementById('mensajeCrud').innerText = 'Eliminación fallida';
+                console.error('Error:', error);
+            })
+            .finally(() => {
+                toogleSpinner(false);
+            });
+        }
+
+        function cargarAlumnos(){
+            toogleSpinner(true);
+            fetch('/alumnos/api/')
+                .then(response => response.json())
+                .then(data => {
+                    let alumnosDiv = document.getElementById('alumnos');
+                    alumnosDiv.innerHTML = "";
+                    data.forEach(alumno => {
+                        alumnosDiv.innerHTML += `
+                        <div class="col-md-3 card p-3 m-2">
+                            <h5>${alumno.nombre} ${alumno.apellido}</h5>
+                            <p><strong>Edad:</strong> ${alumno.edad}</p>
+                            <p><strong>Matrícula:</strong> ${alumno.matricula}</p>
+                            <p><strong>Correo:</strong> ${alumno.correo}</p>
+                            <div class="d-flex justify-content-between">
+                                <button class="btn btn-warning btn-sm" onclick="consultarAlumno('${alumno.id}')">
+                                    <i class="fas fa-edit"></i> Editar
+                                </button>
+                                <button class="btn btn-danger btn-sm" onclick="eliminarAlumno('${alumno.id}')">
+                                    <i class="fas fa-trash"></i> Eliminar
+                                </button>
+                            </div>
+                        </div>
+                        `;
+                    });
+                })
+                .catch(error => console.error('Error:', error))
+                .finally(() => {
+                toogleSpinner(false);
+            });
+        }
+
+        cargarAlumnos();
+    </script>
+
+    
+</body>
+</html>
