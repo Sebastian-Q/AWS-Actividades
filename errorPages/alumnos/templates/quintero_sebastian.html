@@ -33,7 +33,19 @@
                 <!-- La vista de alumnos -->
                 <div class="col-6 mt-3">
                     <h1>Lista Alumnos</h1>
-                    <div class="row" id="alumnos"></div>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Apellido</th>
+                                <th>Edad</th>
+                                <th>Matrícula</th>
+                                <th>Correo</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="alumnos"></tbody>
+                    </table>
                 </div>
             </div>
 
@@ -153,20 +165,23 @@
                     alumnosDiv.innerHTML = "";
                     data.forEach(alumno => {
                         alumnosDiv.innerHTML += `
-                        <div class="col-md-3 card p-3 m-2">
-                            <h5>${alumno.nombre} ${alumno.apellido}</h5>
-                            <p><strong>Edad:</strong> ${alumno.edad}</p>
-                            <p><strong>Matrícula:</strong> ${alumno.matricula}</p>
-                            <p><strong>Correo:</strong> ${alumno.correo}</p>
-                            <div class="d-flex justify-content-between">
-                                <button class="btn btn-warning btn-sm" onclick="consultarAlumno('${alumno.id}')">
-                                    <i class="fas fa-edit"></i> Editar
-                                </button>
-                                <button class="btn btn-danger btn-sm" onclick="eliminarAlumno('${alumno.id}')">
-                                    <i class="fas fa-trash"></i> Eliminar
-                                </button>
-                            </div>
-                        </div>
+                        <tr>
+                            <td>${alumno.nombre}</td>
+                            <td>${alumno.apellido}</td>
+                            <td>${alumno.edad}</td>
+                            <td>${alumno.matricula}</td>
+                            <td>${alumno.correo}</td>
+                            <td>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-warning btn-sm" onclick="consultarAlumno('${alumno.id}')">
+                                        <i class="fas fa-edit"></i> Editar
+                                    </button>
+                                    <button class="btn btn-danger btn-sm" onclick="eliminarAlumno('${alumno.id}')">
+                                        <i class="fas fa-trash"></i> Eliminar
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
                         `;
                     });
                 })
