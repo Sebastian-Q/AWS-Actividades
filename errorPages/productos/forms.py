@@ -9,7 +9,7 @@ class productoForm(forms.ModelForm):
         model = Producto
         
         #Definir que campos van a ser incluido en el formulario
-        fields = ['nombre', 'precio', 'imagen']
+        fields = ['nombre', 'precio', 'imagen', 'categoria']
 
         #Definir como se deben de ver o que atributos tiene los campos
         widgets = {
@@ -31,13 +31,19 @@ class productoForm(forms.ModelForm):
                     'placeholder': 'URL de la imagen del producto',
                 }
             ),
+            'categoria': forms.Select(
+                attrs={
+                    'class': 'form-control',
+                }
+            )
         }
 
         #Etiquetas personalizadas
         labels = {
             'nombre': 'Nombre del producto',
             'precio': 'Precio (MXN)',
-            'imagen': 'URL de la imagen'
+            'imagen': 'URL de la imagen',
+            'categoria': 'Categoria del producto'
         }
 
         #Mensajes de error personalizados

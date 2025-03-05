@@ -14,3 +14,6 @@ class ProductoViewSet(viewsets.ModelViewSet):
 def agregar_producto(request):
     form = productoForm()
     return render(request, 'agregar.html', {'form': form})
+
+def prueba_view(request):
+    return render(request, 'prueba.html')
