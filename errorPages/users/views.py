@@ -1,38 +1,32 @@
-import json
-from django.shortcuts import render, redirect
-from django.contrib.auth import login, authenticate, logout
-from .forms import CustomUserCreationForm, CustomUserLoginForm
-from django.contrib.auth.decorators import login_required
-from .message import Message
+#API REST CON DjangoRESTFRAMEWORK
 
-def register_view(request):
-    if request.method == 'POST':
-        form = CustomUserCreationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user) # Iniciar sesión después del registro
-            return redirect('home') # Redirigir a la página principal
-    else:
-        form = CustomUserCreationForm()
-    return render(request, 'register.html', {'form': form})
+from .models import CustomUser
+from .serializers import CustomUserSerializer
+from rest_framework import viewsets
+from rest_framework.renderers import JSONRenderer
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
-def login_view(request):
-    if request.method == 'POST':
-        form = CustomUserLoginForm(data=request.POST)
-        if form.is_valid():
-            user = form.get_user()
-            login(request, user)
-            return redirect('home')
-    else:
-        form = CustomUserLoginForm()
-    return render(request, 'login.html', {'form': form})
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = CustomUser.objects.all()
+    serializer_class = CustomUserSerializer
+    renderer_classes = [JSONRenderer]
+    #http_method_names = ['GET', 'POST']
 
-def logout_view(request):
-    logout(request)
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
 
-    message = Message("info", "Se a cerrado session exitosamente", 200, "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR8MIbugIhZBykSmQcR0QPcfnPUBOZQ6bm35w&s")
-    return render(request, "login.html", {"message":json.dumps(message.to_dict())})
+    #Sobreescribir el método para la obteción de permisos
+    def get_permissions(self):
+        if self.request.method in ['POST', 'PUT', 'DELETE']:
+            #Retornar la función que checa si tenemos sesión
+            return [IsAuthenticated()]
+        #Dar acceso al otro método (GET)
+        return []
 
-@login_required
-def home_view(request):
-    return render(request, 'home.html')
+#Clase adiccional para obtener el par de tokens
+from rest_framework_simplejwt.views import TokenObtainPairView
+from .serializers import CustomTokenPairSerializer
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenPairSerializer

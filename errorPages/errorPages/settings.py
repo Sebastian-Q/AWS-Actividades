@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'categorias',
     'rest_framework',
     'alumnos',
+    'rest_framework_simplejwt',
 ]
 
 MIDDLEWARE = [
@@ -148,3 +149,9 @@ AUTH_USER_MODEL = 'users.CustomUser'
 LOGIN_URL = '/users/login/'
 LOGIN_REDIRECT_URL = '/home' # Dónde irán los usuarios tras iniciar sesión
 LOGOUT_REDIRECT_URL = '/users/login/'
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}

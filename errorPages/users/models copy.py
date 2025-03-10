@@ -5,17 +5,12 @@ from django.utils.timezone import now
 # Create your models here.
 
 class CustomUserManager(BaseUserManager):
-    def create_user(self, email, password, name, surname, control_number, age, tel, **extra_fields):
+    def create_user(self, email, password=None, **extra_fields):
         if not email:
             raise ValueError('El correo electrónico es obligatorio')
         email = self.normalize_email(email)
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
-        user.name = name
-        user.surname = surname
-        user.control_number = control_number
-        user.age = age
-        user.tel = tel
         user.save(using=self._db)
         return user
     
