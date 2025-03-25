@@ -63,13 +63,12 @@ class CustomUserFormAPI(APIView):
             User = get_user_model()
             user = User.objects.create_user(
                 email=user_data['email'],
-                password=user_data['password1'], #Cambio
+                password=user_data['password1'], #Establecer la contraseña
                 name=user_data['name'],
                 surname=user_data['surname'],
                 control_number=user_data['control_number'],
                 age=user_data['age'],
                 tel=user_data['tel'],
             )
-            print('user_data: ', user)
             return Response({'message': 'Usuario creado con éxito'},status=status.HTTP_201_CREATED)
         return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
