@@ -2,6 +2,7 @@ from django.urls import path, include
 from rest_framework.routers import SimpleRouter
 from .views import *
 from rest_framework_simplejwt.views import TokenObtainPairView
+from .views import CustomUserFormAPI 
 
 router = SimpleRouter()
 #router.register('users', UserViewSet)
@@ -13,4 +14,5 @@ urlpatterns = [
     #Esta es la ruta de iniciar sesion
     path('token/', CustomTokenObtainPairView.as_view(), name='obtain_pair'),
     path('token/refresh', TokenObtainPairView.as_view, name='refresh_token'),
+    path('form/', CustomUserFormAPI.as_view(), name='user_form'),
 ]
