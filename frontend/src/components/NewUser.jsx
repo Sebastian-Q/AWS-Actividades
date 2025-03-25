@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const CustomUserForm = () => {
+    const navigate = useNavigate();
     const [formFields, setFormFields] = useState([]);
     const [formData, setFormData] = useState({
         email: "",
@@ -24,10 +26,10 @@ const CustomUserForm = () => {
 
     const handleInputChange = (event) => {
         const { name, value } = event.target;
-        setFormData((field) => ({
-            ...field,
-            [name]: value, // Usa el nombre del campo para actualizar el estado
-        }));
+        setFormData({
+            ...formData,
+            [name]: value,
+        });
     };
 
     const handleSubmit = (event) => {
@@ -37,6 +39,7 @@ const CustomUserForm = () => {
         axios.post("http://127.0.0.1:8000/users/form/", formData)
         .then((response) => {
             alert(response.data.message); // Mensaje de éxito
+            navigate("/");
         })
         .catch((error) => {
             alert("Hubo un error al crear el usuario.");
