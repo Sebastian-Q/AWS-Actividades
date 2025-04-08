@@ -3,6 +3,8 @@ import './App.css';
 import { BrowserRouter as Router, Route, Routes, useLocation } from "react-router-dom";
 import axios from "axios";
 import Login from "./components/Login";
+import Recuperar from "./components/Recuperar";
+import ResetPassword from "./components/ResetPassword";
 import Navbar from "./components/Navbar";
 import UserDataTable from "./components/UserDataTable";
 import AboutUs from "./pages/AboutUs";
@@ -23,6 +25,8 @@ const AnimatedRoutes = () => {
         <Route path='/' element={<Home />} />
         <Route path='/about' element={<AboutUs />} />
         <Route path='/register' element={<CustomUserForm />} />
+        <Route path="/recuperar" element={<Recuperar />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path='*' element={<NotFound />} />
       </Routes>
     </AnimatePresence>
