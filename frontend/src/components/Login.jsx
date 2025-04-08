@@ -8,14 +8,15 @@ const Login = ({ onLoginSuccess }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const navigate = useNavigate();
+  const navi = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
       await login(username, password);
-      navigate("/");
-      //onLoginSuccess(); <--- Esta seria la funcion a ejectur si todo sale bien
+      //Regresar a home
+      navi("/");
+      //onLoginSuccess();
     } catch (err) {
       setError("Credenciales incorrectas");
     }

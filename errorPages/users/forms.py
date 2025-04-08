@@ -1,126 +1,95 @@
-import re
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from .models import CustomUser
 from django.contrib.auth.forms import AuthenticationForm
 
-
+#Primer formulario
 class CustomUserCreationForm(UserCreationForm):
+    password1 = forms.CharField(
+        label='Contraseña',
+        widget = forms.PasswordInput(
+            attrs = {
+                'class':'form-control',
+                'pattern': '^(?=.*\d)(?=.*[A-Z])(?=.*[!#$%&?]).{8,}$',
+                'placeholder': 'Ingrese su contraseña',
+                'title': 'Necesitas definir una contraseña segura: Al menos un número.\nAl menos una letra mayúscula.\nAl menos un carácter especial (!#$%&?).\nMínimo de 8 caracteres en total.',
+                'required': True
+            }
+        )
+    )
+    ##password2
+    password2 = forms.CharField(
+        label='Repite tu Contraseña',
+        widget = forms.PasswordInput(
+            attrs = {
+                'class':'form-control',
+                'pattern': '^(?=.*\d)(?=.*[A-Z])(?=.*[!#$%&?]).{8,}$',
+                'placeholder': 'Repita su contraseña',
+                'title': 'Necesitas definir una contraseña segura',
+                'required': True
+            }
+        )
+    )
+
     class Meta:
         model = CustomUser
-        fields = ['email', 'name', 'surname', 'control_number', 'age', 'tel', 'password1', 'password2']
-    
+        fields = ['email', 'name', 'surname', 'control_number', 'age', 'tel','password1', 'password2']
+
+        #Si quiero editar la forma de los inputs necesito widgets
         widgets = {
+            #Cada uno de los widgets del **MODELO**
             'email': forms.EmailInput(
-                attrs={
-                    'class': 'form-control',
-                    'placeholder': 'Correo electrónico',
+                #Caracteristicas del elemento visual
+                attrs = {
+                    'class':'form-control',
                     'required': True,
-                    'pattern': '^[0-9]{5}tn[0-9]{3}@utez\.edu\.mx$',
+                    'pattern': '^[a-zA-Z0-9]+@utez\.edu\.mx$',
+                    'title': 'Debes ingresar un correo electrónico valido de la UTEZ'
                 }
             ),
             'name': forms.TextInput(
                 attrs={
-                    'class': 'form-control',
-                    'placeholder': 'Nombre Completo',
-                    'required': True,
+                    'class':'form-control',
+                    'required': True
                 }
             ),
             'surname': forms.TextInput(
                 attrs={
-                    'class': 'form-control',
-                    'placeholder': 'Apellidos',
-                    'required': True,
+                    'class':'form-control',
+                    'required': True
                 }
             ),
             'control_number': forms.TextInput(
                 attrs={
-                    'class': 'form-control',
-                    'placeholder': 'Número de control',
+                    'class':'form-control',
                     'required': True,
-                    'pattern': '^\d{5}[a-zA-Z]{2}\d{3}$'
+                    'pattern': '^[0-9]{5}[a-zA-Z]{2}[0-9]{3}$',
+                    'title': 'Necesitas ingresar una matricula valida de la UTEZ',
+                    'maxlength': '20'
                 }
             ),
             'age': forms.NumberInput(
                 attrs={
-                    'class': 'form-control',
-                    'placeholder': 'Edad',
+                    'class':'form-control',
                     'required': True,
+                    'pattern': '^[0-9]+$',
+                    'title': 'Ingrese solo numeros',
+                    'max': '100',
+                    'min': '1'
                 }
             ),
             'tel': forms.TextInput(
                 attrs={
-                    'class': 'form-control',
-                    'placeholder': 'Teléfono',
+                    'class':'form-control',
                     'required': True,
-                    'maxlength': 10,
-                    'minlength': 10
+                    'pattern': '^[0-9\+-]{10,}$',
+                    'title': 'Ingrese solo numeros',
+                    'maxlength': '15'
                 }
-            ),
-            'password1': forms.TextInput(
-                attrs={
-                    'class': 'form-control',
-                    'placeholder': 'Contraseña',
-                    'required': True,
-                }
-            ),
-            'password2': forms.TextInput(
-                attrs={
-                    'class': 'form-control',
-                    'placeholder': 'Confirmar Contraseña',
-                    'required': True,
-                }
-            ),
-            
+            )
         }
 
-    def clean_email(self):
-        email = self.cleaned_data.get('email')
-        pattern = r'^[0-9]{5}tn[0-9]{3}@utez\.edu\.mx$'
-        if not re.match(pattern, email):
-            raise forms.ValidationError("El correo electrónico debe pertenecer al dominio @utez.edu.mx y cumplir con el formato correcto.")
-        return email
 
-    def clean_control_number(self):
-        control_number = self.cleaned_data.get('control_number')
-        if not re.match(r'^\d{5}[a-zA-Z]{2}\d{3}$', control_number):
-            raise forms.ValidationError("El número de control debe contener 10 caracteres en el formato correcto.")
-        return control_number
-    
-    def clean_tel(self):
-        tel = self.cleaned_data.get('tel')
-        if not re.match(r'^\d{10}$', tel):
-            raise forms.ValidationError("El número de teléfono debe contener exactamente 10 dígitos.")
-        return tel
-    
-    def clean_password1(self):
-        password1 = self.cleaned_data.get('password1')
-        if len(password1) < 8:
-            raise forms.ValidationError("La contraseña debe tener al menos 8 caracteres.")
-        if not any(char.isdigit() for char in password1):
-            raise forms.ValidationError("La contraseña debe contener al menos un número.")
-        if not re.search(r'[!#$%&?]', password1):
-            raise forms.ValidationError("La contraseña debe contener al menos un símbolo (!, #, $, %, & o ?).")
-        return password1
-    
-    def clean(self):
-        cleaned_data = super().clean()
-        password1 = cleaned_data.get("password1")
-        password2 = cleaned_data.get("password2")
-        if password1 and password2 and password1 != password2:
-            raise forms.ValidationError("Las contraseñas no coinciden.")
-        return cleaned_data
-
+#Segundo formulario (inicio de sesión)
 class CustomUserLoginForm(AuthenticationForm):
-    
-    def clean(self):
-        cleaned_data = super().clean()
-        username = cleaned_data.get("username")
-        password = cleaned_data.get("password")
-        if username and password:
-            user = authenticate(username=username, password=password) # type: ignore
-            if not user:
-                raise forms.ValidationError("Usuario o contraseña incorrectos.")
-        return cleaned_data
-    
     pass
