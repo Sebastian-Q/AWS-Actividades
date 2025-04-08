@@ -48,7 +48,6 @@ const UserDataTable = () => {
               <button
                 className="btn btn-danger me-2"
                 onClick={() => {
-                  console.log("TOKEN: ", token);
                   Swal.fire({
                         title: 'Eliminación de usuario',
                         text: `¿Estás seguro de que deseas eliminar a ${row.name}?`,
